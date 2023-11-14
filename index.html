@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Modelo 3D</title>
+    <!-- Incluye la biblioteca A-Frame -->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+</head>
+<body>
+    <a-scene>
+        <!-- Agrega el modelo 3D GLB -->
+        <a-entity gltf-model="url(capo.glb)"></a-entity>
+        
+        <!-- Configuración de la cámara y el entorno -->
+        <a-camera position="0 1.6 0">
+            <a-cursor></a-cursor>
+        </a-camera>
+        
+        <a-sky color="#ECECEC"></a-sky>
+    </a-scene>
+</body>
+</html>
