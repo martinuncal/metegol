@@ -10,11 +10,11 @@
 </head>
 <body>
     <a-scene embedded arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;">
-        <!-- Agrega el modelo 3D GLB para la detección de entorno -->
-        <a-entity gltf-model="url(capo.glb)" scale="0.1 0.1 0.1"></a-entity>
+        <!-- Ajusta la escala del modelo -->
+        <a-entity gltf-model="url(capo.glb)" scale="0.5 0.5 0.5"></a-entity>
         
-        <!-- Configuración de la cámara y el entorno -->
-        <a-camera-static></a-camera-static>
+        <!-- Configura el zoom de la cámara -->
+        <a-camera-static zoom="0.5"></a-camera-static>
     </a-scene>
 </body>
 </html>
