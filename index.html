@@ -11,7 +11,12 @@
 <body>
     <a-scene embedded arjs>
         <!-- Ajusta la escala del modelo para que sea más grande -->
-        <a-entity gltf-model="url(capo.glb)" scale="1 1 1"></a-entity>
+        <a-entity gltf-model="#capo" scale="1 1 1"></a-entity>
+
+        <!-- Modelo 3D GLB -->
+        <a-assets>
+            <a-asset-item id="capo" src="capo.glb"></a-asset-item>
+        </a-assets>
         
         <!-- Configura la cámara con un zoom más bajo -->
         <a-camera-static zoom="0.5"></a-camera-static>
