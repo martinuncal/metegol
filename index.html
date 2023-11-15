@@ -10,8 +10,10 @@
 </head>
 <body>
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-        <!-- Agrega el modelo 3D GLB -->
-        <a-entity gltf-model="url(capo.glb)"></a-entity>
+        <!-- Agrega el modelo 3D GLB en el marcador "hiro" -->
+        <a-marker preset="hiro">
+            <a-entity gltf-model="url(capo.glb)" scale="0.1 0.1 0.1"></a-entity>
+        </a-marker>
         
         <!-- Configuración de la cámara y el entorno -->
         <a-camera-static></a-camera-static>
