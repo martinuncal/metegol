@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizador de Modelo 3D en AR con Control de Zoom</title>
+    <title>Visualizador de Modelo 3D en AR con Controles</title>
     <!-- Incluye la biblioteca A-Frame y AR.js -->
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/2.0.8/aframe/build/aframe-ar.js"></script>
@@ -21,54 +21,69 @@
         <!-- Configura la cámara -->
         <a-entity id="camera" camera></a-entity>
 
-        <!-- Añade un plano para capturar eventos de zoom -->
-        <a-plane position="0 0 -5" rotation="-90 0 0" width="4" height="4" color="transparent" opacity="0.1" zoom-control></a-plane>
+        <!-- Controles de zoom y desplazamiento -->
+        <a-entity id="controls" visible="false">
+            <a-box position="-1.5 0 -2" rotation="0 45 0" color="green" scale="0.5 0.5 0.5" zoom-control></a-box>
+            <a-box position="1.5 0 -2" rotation="0 -45 0" color="red" scale="0.5 0.5 0.5" zoom-control></a-box>
+            <a-box position="0 0 -3" color="blue" scale="1 0.5 0.1" drag-control></a-box>
+        </a-entity>
     </a-scene>
 
     <script>
         // Añade un componente para controlar el zoom
         AFRAME.registerComponent('zoom-control', {
             init: function () {
-                // Escala inicial del modelo
-                var initialScale = { x: 1, y: 1, z: 1 };
-                
-                // Establece el nivel de zoom inicial
-                var zoomLevel = 1;
+                var el = this.el;
+                var model = document.querySelector('[gltf-model="#capo"]');
+                var initialScale = model.getAttribute('scale');
+                var zoomSpeed = 0.05;
 
-                // Registra el evento 'touchstart' para comenzar a rastrear el movimiento del dedo
-                this.el.addEventListener('touchstart', function (event) {
-                    // Obtiene la posición inicial del dedo
-                    var startTouch = event.touches[0].clientY;
-
-                    // Registra el evento 'touchmove' para ajustar el zoom mientras se mueve el dedo
-                    window.addEventListener('touchmove', function (event) {
-                        // Obtiene la posición actual del dedo
-                        var currentTouch = event.touches[0].clientY;
-
-                        // Calcula la diferencia en las posiciones
-                        var delta = currentTouch - startTouch;
-
-                        // Ajusta el nivel de zoom en función de la diferencia
-                        zoomLevel += delta / 100;
-
-                        // Ajusta la escala del modelo según el nivel de zoom
-                        document.querySelector('[gltf-model="#capo"]').setAttribute('scale', {
-                            x: initialScale.x * zoomLevel,
-                            y: initialScale.y * zoomLevel,
-                            z: initialScale.z * zoomLevel
-                        });
-
-                        // Actualiza la posición inicial para el próximo movimiento
-                        startTouch = currentTouch;
+                el.addEventListener('click', function () {
+                    model.setAttribute('scale', {
+                        x: initialScale.x + zoomSpeed,
+                        y: initialScale.y + zoomSpeed,
+                        z: initialScale.z + zoomSpeed
                     });
                 });
+            }
+        });
 
-                // Registra el evento 'touchend' para dejar de rastrear el movimiento del dedo
-                this.el.addEventListener('touchend', function () {
-                    // Detiene el seguimiento del movimiento cuando se levanta el dedo
-                    window.removeEventListener('touchmove');
+        // Añade un componente para controlar el desplazamiento
+        AFRAME.registerComponent('drag-control', {
+            init: function () {
+                var el = this.el;
+                var isDragging = false;
+                var previousPosition = { x: 0, y: 0 };
+
+                el.addEventListener('mousedown', function (event) {
+                    isDragging = true;
+                    previousPosition.x = event.clientX;
+                    previousPosition.y = event.clientY;
+                });
+
+                window.addEventListener('mousemove', function (event) {
+                    if (!isDragging) return;
+
+                    var deltaX = event.clientX - previousPosition.x;
+                    var deltaY = event.clientY - previousPosition.y;
+
+                    el.object3D.position.x += deltaX / 100;
+                    el.object3D.position.y -= deltaY / 100;
+
+                    previousPosition.x = event.clientX;
+                    previousPosition.y = event.clientY;
+                });
+
+                window.addEventListener('mouseup', function () {
+                    isDragging = false;
                 });
             }
+        });
+
+        // Muestra/oculta los controles al tocar la pantalla
+        document.querySelector('#camera').addEventListener('click', function () {
+            var controls = document.querySelector('#controls');
+            controls.setAttribute('visible', !controls.getAttribute('visible'));
         });
     </script>
 </body>
