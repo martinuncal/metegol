@@ -10,46 +10,69 @@
 </head>
 <body>
     <a-scene embedded arjs>
-        <!-- Ajusta la escala del modelo para que sea más grande -->
+        <!-- Configura la cámara -->
+        <a-entity camera look-controls></a-entity>
+
+        <!-- Añade el modelo 3D GLB -->
         <a-entity gltf-model="#capo" scale="1 1 1"></a-entity>
 
         <!-- Modelo 3D GLB -->
         <a-assets>
             <a-asset-item id="capo" src="capo.glb"></a-asset-item>
         </a-assets>
-        
-        <!-- Configura la cámara -->
-        <a-entity id="camera" camera></a-entity>
 
         <!-- Controles de zoom y desplazamiento -->
-        <a-entity id="controls" visible="false">
-            <a-box position="-1.5 0 -2" rotation="0 45 0" color="green" scale="0.5 0.5 0.5" zoom-control></a-box>
-            <a-box position="1.5 0 -2" rotation="0 -45 0" color="red" scale="0.5 0.5 0.5" zoom-control></a-box>
-            <a-box position="0 0 -3" color="blue" scale="1 0.5 0.1" drag-control></a-box>
+        <a-entity id="controls">
+            <!-- Zoom In -->
+            <a-box position="-1.5 0 -2" color="green" scale="0.5 0.5 0.1" zoom-control="direction: in"></a-box>
+            <!-- Zoom Out -->
+            <a-box position="1.5 0 -2" color="red" scale="0.5 0.5 0.1" zoom-control="direction: out"></a-box>
+            <!-- Desplazamiento Izquierda -->
+            <a-box position="-0.5 0 -3" color="blue" scale="0.1 0.5 0.1" drag-control="direction: left"></a-box>
+            <!-- Desplazamiento Derecha -->
+            <a-box position="0.5 0 -3" color="yellow" scale="0.1 0.5 0.1" drag-control="direction: right"></a-box>
         </a-entity>
     </a-scene>
 
     <script>
-        // Añade un componente para controlar el zoom
+        // Añade un componente para controlar el zoom y el desplazamiento
         AFRAME.registerComponent('zoom-control', {
+            schema: {
+                direction: { type: 'string', default: 'in' }
+            },
             init: function () {
                 var el = this.el;
                 var model = document.querySelector('[gltf-model="#capo"]');
-                var initialScale = model.getAttribute('scale');
-                var zoomSpeed = 0.05;
+                var scaleIncrement = 0.1;
 
                 el.addEventListener('click', function () {
-                    model.setAttribute('scale', {
-                        x: initialScale.x + zoomSpeed,
-                        y: initialScale.y + zoomSpeed,
-                        z: initialScale.z + zoomSpeed
-                    });
+                    var currentScale = model.getAttribute('scale');
+                    var newScale;
+
+                    if (this.data.direction === 'in') {
+                        newScale = {
+                            x: currentScale.x - scaleIncrement,
+                            y: currentScale.y - scaleIncrement,
+                            z: currentScale.z - scaleIncrement
+                        };
+                    } else if (this.data.direction === 'out') {
+                        newScale = {
+                            x: currentScale.x + scaleIncrement,
+                            y: currentScale.y + scaleIncrement,
+                            z: currentScale.z + scaleIncrement
+                        };
+                    }
+
+                    model.setAttribute('scale', newScale);
                 });
             }
         });
 
         // Añade un componente para controlar el desplazamiento
         AFRAME.registerComponent('drag-control', {
+            schema: {
+                direction: { type: 'string', default: 'left' }
+            },
             init: function () {
                 var el = this.el;
                 var isDragging = false;
@@ -67,8 +90,29 @@
                     var deltaX = event.clientX - previousPosition.x;
                     var deltaY = event.clientY - previousPosition.y;
 
-                    el.object3D.position.x += deltaX / 100;
-                    el.object3D.position.y -= deltaY / 100;
+                    if (el.object3D) {
+                        if (el.object3D.position) {
+                            if (el.object3D.position.x && el.object3D.position.y) {
+                                if (el.components) {
+                                    var currentPosition = el.object3D.position;
+                                    if (el.components.position) {
+                                        if (el.components.position.data) {
+                                            if (el.components.position.data.x) {
+                                                if (el.components.position.data.y) {
+                                                    var newPosition = {
+                                                        x: currentPosition.x + (deltaX / 100),
+                                                        y: currentPosition.y - (deltaY / 100),
+                                                        z: currentPosition.z
+                                                    };
+                                                    el.setAttribute('position', newPosition);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     previousPosition.x = event.clientX;
                     previousPosition.y = event.clientY;
@@ -78,12 +122,6 @@
                     isDragging = false;
                 });
             }
-        });
-
-        // Muestra/oculta los controles al tocar la pantalla
-        document.querySelector('#camera').addEventListener('click', function () {
-            var controls = document.querySelector('#controls');
-            controls.setAttribute('visible', !controls.getAttribute('visible'));
         });
     </script>
 </body>
