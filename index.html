@@ -9,8 +9,8 @@
 </head>
 <body>
     <a-scene embedded>
-        <!-- Configura la cámara -->
-        <a-entity camera look-controls position="0 1.6 0"></a-entity>
+        <!-- Configura la cámara sin zoom -->
+        <a-entity camera look-controls fov="80" position="0 1.6 0"></a-entity>
 
         <!-- Añade el modelo 3D GLB -->
         <a-entity gltf-model="capo.glb" scale="0.1 0.1 0.1"></a-entity>
