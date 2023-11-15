@@ -9,12 +9,12 @@
     <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/2.0.8/aframe/build/aframe-ar.js"></script>
 </head>
 <body>
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+    <a-scene embedded arjs>
         <!-- Ajusta la escala del modelo para que sea más grande -->
         <a-entity gltf-model="url(capo.glb)" scale="1 1 1"></a-entity>
         
         <!-- Configura la cámara con un zoom más bajo -->
-        <a-camera-static zoom="0.2"></a-camera-static>
+        <a-camera-static zoom="0.5"></a-camera-static>
     </a-scene>
 </body>
 </html>
