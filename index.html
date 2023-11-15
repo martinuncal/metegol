@@ -10,8 +10,8 @@
 </head>
 <body>
     <a-scene embedded arjs>
-        <!-- Configura la cámara -->
-        <a-entity camera look-controls></a-entity>
+        <!-- Configura la cámara con zoom -->
+        <a-entity camera="zoom: 0.5;" look-controls></a-entity>
 
         <!-- Añade el modelo 3D GLB -->
         <a-entity gltf-model="#capo" scale="1 1 1"></a-entity>
@@ -32,6 +32,25 @@
             <!-- Desplazamiento Derecha -->
             <a-box position="0.5 0 -3" color="yellow" scale="0.1 0.5 0.1" drag-control="direction: right"></a-box>
         </a-entity>
+
+        <!-- Componente para controlar el zoom de la cámara -->
+        <a-entity id="zoom-control" cursor-listener>
+            <!-- Zoom In -->
+            <a-box position="-1.5 0 -2" color="green" scale="0.5 0.5 0.1" zoom-control="direction: in"></a-box>
+            <!-- Zoom Out -->
+            <a-box position="1.5 0 -2" color="red" scale="0.5 0.5 0.1" zoom-control="direction: out"></a-box>
+        </a-entity>
+
+        <!-- Componente para controlar el desplazamiento -->
+        <a-entity id="drag-control" cursor-listener>
+            <!-- Desplazamiento Izquierda -->
+            <a-box position="-0.5 0 -3" color="blue" scale="0.1 0.5 0.1" drag-control="direction: left"></a-box>
+            <!-- Desplazamiento Derecha -->
+            <a-box position="0.5 0 -3" color="yellow" scale="0.1 0.5 0.1" drag-control="direction: right"></a-box>
+        </a-entity>
+
+        <!-- Cursor -->
+        <a-entity cursor="rayOrigin: mouse" raycaster="objects: [cursor-listener]"></a-entity>
     </a-scene>
 
     <script>
@@ -42,28 +61,19 @@
             },
             init: function () {
                 var el = this.el;
-                var model = document.querySelector('[gltf-model="#capo"]');
-                var scaleIncrement = 0.1;
+                var camera = document.querySelector('[camera]');
+                var zoomSpeed = 0.1;
 
                 el.addEventListener('click', function () {
-                    var currentScale = model.getAttribute('scale');
-                    var newScale;
+                    if (camera) {
+                        var currentZoom = camera.getAttribute('camera').zoom;
 
-                    if (this.data.direction === 'in') {
-                        newScale = {
-                            x: currentScale.x - scaleIncrement,
-                            y: currentScale.y - scaleIncrement,
-                            z: currentScale.z - scaleIncrement
-                        };
-                    } else if (this.data.direction === 'out') {
-                        newScale = {
-                            x: currentScale.x + scaleIncrement,
-                            y: currentScale.y + scaleIncrement,
-                            z: currentScale.z + scaleIncrement
-                        };
+                        if (this.data.direction === 'in') {
+                            camera.setAttribute('camera', 'zoom', currentZoom - zoomSpeed);
+                        } else if (this.data.direction === 'out') {
+                            camera.setAttribute('camera', 'zoom', currentZoom + zoomSpeed);
+                        }
                     }
-
-                    model.setAttribute('scale', newScale);
                 });
             }
         });
@@ -90,27 +100,15 @@
                     var deltaX = event.clientX - previousPosition.x;
                     var deltaY = event.clientY - previousPosition.y;
 
-                    if (el.object3D) {
-                        if (el.object3D.position) {
-                            if (el.object3D.position.x && el.object3D.position.y) {
-                                if (el.components) {
-                                    var currentPosition = el.object3D.position;
-                                    if (el.components.position) {
-                                        if (el.components.position.data) {
-                                            if (el.components.position.data.x) {
-                                                if (el.components.position.data.y) {
-                                                    var newPosition = {
-                                                        x: currentPosition.x + (deltaX / 100),
-                                                        y: currentPosition.y - (deltaY / 100),
-                                                        z: currentPosition.z
-                                                    };
-                                                    el.setAttribute('position', newPosition);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                    if (el.object3D && el.object3D.position) {
+                        var currentPosition = el.object3D.position;
+
+                        if (el.components && el.components.position && el.components.position.data) {
+                            el.setAttribute('position', {
+                                x: currentPosition.x + (deltaX / 100),
+                                y: currentPosition.y - (deltaY / 100),
+                                z: currentPosition.z
+                            });
                         }
                     }
 
@@ -120,6 +118,21 @@
 
                 window.addEventListener('mouseup', function () {
                     isDragging = false;
+                });
+            }
+        });
+
+        // Añade un componente para escuchar eventos de cursor
+        AFRAME.registerComponent('cursor-listener', {
+            init: function () {
+                var el = this.el;
+
+                el.addEventListener('mouseenter', function () {
+                    el.setAttribute('material', 'color', 'gray');
+                });
+
+                el.addEventListener('mouseleave', function () {
+                    el.setAttribute('material', 'color', el.getAttribute('original-color'));
                 });
             }
         });
